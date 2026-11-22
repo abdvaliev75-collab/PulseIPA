@@ -1,67 +1,299 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#090812">
-  <meta name="description" content="PulseIPA — менеджер IPA-файлов">
-  <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="style.css">
-  <title>PulseIPA</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0714">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>PulseIPA</title>
+<style>
+:root{--bg:#0b0714;--panel:rgba(255,255,255,.07);--line:rgba(255,255,255,.12);--tx:#f4effe;--mu:#a79cc4;--ac:#9d6bff;--ac2:#d36bff;--ok:#6be3a8;--er:#ff6b8a;--r:26px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 -apple-system,"SF Pro Display",system-ui,sans-serif}
+body{min-height:100vh;padding:calc(env(safe-area-inset-top) + 18px) 18px calc(env(safe-area-inset-bottom) + 110px);max-width:640px;margin:auto;background:radial-gradient(500px 380px at 85% -5%,rgba(157,107,255,.35),transparent),radial-gradient(420px 320px at -10% 30%,rgba(211,107,255,.18),transparent),var(--bg);background-attachment:fixed}
+.glass{background:var(--panel);border:1px solid var(--line);backdrop-filter:blur(28px) saturate(1.6);-webkit-backdrop-filter:blur(28px) saturate(1.6);border-radius:var(--r);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 10px 30px rgba(0,0,0,.35)}
+header{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+.logo{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;font-size:22px;background:linear-gradient(135deg,var(--ac),var(--ac2));box-shadow:0 6px 20px rgba(157,107,255,.5)}
+header b{font-size:19px;letter-spacing:.3px}header small{display:block;color:var(--mu);font-size:12px}
+.pill{margin-left:auto;font-size:12px;padding:6px 12px;border-radius:99px;color:var(--ok)}
+h1{font-size:34px;line-height:1.1;margin:6px 0 8px;letter-spacing:-.8px}
+h2{font-size:22px;margin:26px 0 12px;letter-spacing:-.3px}
+p.lead{color:var(--mu);margin:0 0 20px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:6px}
+.stat{padding:14px;text-align:center}.stat b{font-size:24px;display:block}.stat span{font-size:12px;color:var(--mu)}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.act{padding:18px;text-align:left;color:var(--tx);font:inherit;cursor:pointer;transition:transform .15s}
+.act:active{transform:scale(.97)}
+.act i{font-style:normal;font-size:26px;display:block;margin-bottom:10px}
+.act b{display:block}.act small{color:var(--mu)}
+.btn{border:0;border-radius:16px;padding:12px 16px;font:600 15px inherit;font-family:inherit;color:#fff;background:linear-gradient(135deg,var(--ac),var(--ac2));cursor:pointer;transition:transform .15s,opacity .2s}
+.btn:active{transform:scale(.96)}.btn:disabled{opacity:.45}
+.btn.sec{background:rgba(255,255,255,.1);border:1px solid var(--line)}.btn.red{background:rgba(255,107,138,.18);color:var(--er)}
+.btn.sm{padding:8px 12px;font-size:13px;border-radius:12px}
+input[type=text],input[type=url],input[type=password],input[type=search]{width:100%;padding:14px 16px;border-radius:16px;border:1px solid var(--line);background:rgba(0,0,0,.3);color:var(--tx);font:inherit;outline:none;margin-bottom:10px}
+input:focus{border-color:var(--ac)}
+label.file{display:block;padding:14px 16px;border:1px dashed var(--line);border-radius:16px;margin-bottom:10px;color:var(--mu);cursor:pointer;font-size:14px}
+label.file.has{color:var(--ok);border-color:var(--ok)}
+label.file input{display:none}
+.card{padding:18px}
+.item{display:flex;gap:12px;align-items:center;padding:14px;margin-bottom:10px}
+.ico{width:50px;height:50px;border-radius:14px;flex:none;display:grid;place-items:center;font-size:22px;background:linear-gradient(135deg,#3b2670,#7c4dff)}
+.meta{flex:1;min-width:0}.meta b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.meta small{color:var(--mu);font-size:12px}
+.more{background:none;border:0;color:var(--mu);font-size:26px;padding:6px 10px;cursor:pointer}
+.empty{text-align:center;padding:36px 20px;color:var(--mu)}.empty i{font-style:normal;font-size:40px;display:block;margin-bottom:8px}
+.bar{height:6px;border-radius:9px;background:rgba(255,255,255,.1);overflow:hidden;margin:10px 0}.bar div{height:100%;width:0;background:linear-gradient(90deg,var(--ac),var(--ac2));transition:width .2s}
+.view{display:none}.view.on{display:block}
+nav{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 14px);display:flex;gap:4px;padding:7px;border-radius:34px;z-index:5;width:min(92vw,420px)}
+nav button{flex:1;background:none;border:0;color:var(--mu);font:11px inherit;font-family:inherit;padding:8px 0;border-radius:26px;cursor:pointer;transition:.2s}
+nav button i{font-style:normal;display:block;font-size:20px}
+nav button.on{background:rgba(157,107,255,.28);color:#fff}
+.sheet{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:flex-end;z-index:10}.sheet.on{display:flex}
+.sheet .box{width:100%;max-width:640px;margin:auto;border-radius:30px 30px 0 0;padding:20px 20px calc(env(safe-area-inset-bottom) + 20px);background:#17102a;animation:up .25s}
+@keyframes up{from{transform:translateY(40px);opacity:0}}
+.box h3{margin:0 0 4px}.box .row{display:grid;gap:8px;margin-top:14px}
+.toast{position:fixed;top:calc(env(safe-area-inset-top) + 12px);left:50%;transform:translate(-50%,-90px);padding:12px 20px;border-radius:22px;z-index:20;transition:transform .3s;font-size:14px;max-width:90vw}
+.toast.on{transform:translate(-50%,0)}
+.note{font-size:13px;color:var(--mu);margin:4px 2px 12px}
+.drop{outline:2px dashed var(--ac);outline-offset:-10px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand"><span class="logo">ϟ</span><div><b>PULSEIPA</b><small>IPA MANAGER</small></div></div>
-    <span class="online"><i></i> READY</span>
-  </header>
+<header><div class="logo">ϟ</div><div><b>PulseIPA</b><small>Менеджер IPA · iOS 27</small></div><span class="pill glass" id="state">Готов</span></header>
 
-  <main>
-    <section class="hero">
-      <p class="eyebrow">YOUR IPA UNIVERSE</p>
-      <h1>Твои приложения.<br><span>Твои правила.</span></h1>
-      <p class="muted">Управляй IPA-файлами в одном месте.</p>
-      <div class="stats">
-        <div class="stat"><strong id="fileCount">0</strong><small>ФАЙЛОВ</small></div>
-        <div class="stat"><strong>IPA</strong><small>ФОРМАТ</small></div>
-        <div class="stat"><strong>iOS</strong><small>ПЛАТФОРМА</small></div>
-      </div>
-    </section>
+<section class="view on" id="home">
+<h1>Твои приложения.<br>Твои правила.</h1>
+<p class="lead">Храни IPA на устройстве, устанавливай через AltStore, TrollStore или Feather и подписывай через свой сервис.</p>
+<div class="stats">
+<div class="glass stat"><b id="sCount">0</b><span>файлов</span></div>
+<div class="glass stat"><b id="sSize">0 МБ</b><span>занято</span></div>
+<div class="glass stat"><b>iOS 27</b><span>платформа</span></div>
+</div>
+<h2>Быстрые действия</h2>
+<div class="actions">
+<button class="glass act" id="aImport"><i>＋</i><b>Импорт IPA</b><small>Из «Файлов»</small></button>
+<button class="glass act" id="aDl"><i>↓</i><b>Скачать IPA</b><small>По HTTPS-ссылке</small></button>
+<button class="glass act" id="aSign"><i>✳</i><b>Подписать</b><small>Сертификат и профиль</small></button>
+<button class="glass act" id="aExport"><i>⇪</i><b>Резервная копия</b><small>Список в JSON</small></button>
+</div>
+<h2>Недавние</h2><div id="recent"></div>
+</section>
 
-    <section class="section">
-      <div class="section-head"><h2>Быстрые действия</h2><span class="tag">TOOLS</span></div>
-      <div class="actions">
-        <button class="action" id="pickBtn"><span class="action-icon">＋</span><b>Импорт IPA</b><small>Выбрать из «Файлов»</small></button>
-        <button class="action" id="urlBtn"><span class="action-icon">↓</span><b>Скачать IPA</b><small>По прямой HTTPS-ссылке</small></button>
-      </div>
-      <input id="fileInput" type="file" accept=".ipa,application/octet-stream" multiple hidden>
-    </section>
+<section class="view" id="library">
+<h1>Библиотека</h1>
+<input type="search" id="q" placeholder="Поиск по названию или bundle ID">
+<div id="list"></div>
+</section>
 
-    <section class="section">
-      <div class="section-head"><h2>Моя библиотека</h2><span class="tag" id="libraryLabel">0 ITEMS</span></div>
-      <div id="fileList" class="file-list">
-        <div class="empty"><div class="empty-icon">▱</div><b>Пока здесь пусто</b><p>Импортируй IPA-файл, чтобы добавить его в библиотеку.</p></div>
-      </div>
-    </section>
+<section class="view" id="download">
+<h1>Скачать IPA</h1>
+<p class="lead">Вставь прямую HTTPS-ссылку на .ipa. Сервер должен разрешать CORS, иначе браузер заблокирует загрузку.</p>
+<div class="glass card">
+<input type="url" id="url" placeholder="https://example.com/app.ipa" inputmode="url">
+<div class="bar"><div id="prog"></div></div>
+<p class="note" id="dlNote">Ожидание ссылки</p>
+<button class="btn" id="dlGo" style="width:100%">Скачать в библиотеку</button>
+</div>
+</section>
 
-    <section class="section">
-      <div class="section-head"><h2>IPA Sign</h2><span class="tag">SIGNING</span></div>
-      <div class="sign-card">
-        <div class="sign-symbol">✳</div>
-        <h3>Подписание приложений</h3>
-        <p>Этот веб-интерфейс пока не подписывает IPA самостоятельно. Для реальной подписи потребуется совместимый доверенный процесс, сертификат и provisioning profile.</p>
-        <button class="secondary" id="signInfo">Подробнее</button>
-      </div>
-    </section>
-    <p class="footnote">PulseIPA Web · Personal IPA library</p>
-  </main>
+<section class="view" id="sign">
+<h1>Подпись</h1>
+<p class="lead">Подпись требует сертификата, и в браузере её делает твой сервис. Укажи его адрес, и сайт отправит файлы на него и сохранит готовый IPA.</p>
+<div class="glass card">
+<input type="url" id="ep" placeholder="Адрес сервиса подписи (HTTPS)">
+<label class="file" id="lIpa">Выбрать IPA из библиотеки или файла<input type="file" id="fIpa" accept=".ipa"></label>
+<select id="pick" style="width:100%;padding:14px;border-radius:16px;background:rgba(0,0,0,.3);color:var(--tx);border:1px solid var(--line);margin-bottom:10px;font:inherit"><option value="">Или выбрать из библиотеки</option></select>
+<label class="file" id="lP12">Сертификат .p12<input type="file" id="fP12" accept=".p12"></label>
+<label class="file" id="lMp">Профиль .mobileprovision<input type="file" id="fMp" accept=".mobileprovision"></label>
+<input type="password" id="pw" placeholder="Пароль сертификата">
+<input type="text" id="bid" placeholder="Новый Bundle ID (необязательно)">
+<div class="bar"><div id="sprog"></div></div>
+<button class="btn" id="signGo" style="width:100%">Подписать</button>
+<p class="note" style="margin-top:12px">Файлы уходят только на указанный адрес. Пароль и сертификат на сайте не сохраняются.</p>
+</div>
+</section>
 
-  <nav class="bottom-nav">
-    <a class="active" href="#home">⌂<small>Главная</small></a>
-    <a href="#library">▤<small>Библиотека</small></a>
-    <a href="#download">↓<small>Загрузка</small></a>
-    <a href="#sign">✳<small>Подпись</small></a>
-  </nav>
-  <div id="toast" class="toast" role="status"></div>
-  <script src="app.js"></script>
+<nav class="glass">
+<button data-v="home" class="on"><i>⌂</i>Главная</button>
+<button data-v="library"><i>▤</i>Библиотека</button>
+<button data-v="download"><i>↓</i>Загрузка</button>
+<button data-v="sign"><i>✳</i>Подпись</button>
+</nav>
+
+<div class="sheet" id="sheet"><div class="box glass"><h3 id="shT"></h3><small id="shS" style="color:var(--mu)"></small><div class="row" id="shR"></div></div></div>
+<div class="toast glass" id="toast"></div>
+<input type="file" id="fImp" accept=".ipa" multiple hidden>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+let db,items=[];
+const fmt=n=>n>1e9?(n/1e9).toFixed(2)+' ГБ':(n/1e6).toFixed(1)+' МБ';
+function toast(t,ok=true){const e=$('#toast');e.textContent=t;e.style.color=ok?'var(--tx)':'var(--er)';e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2800)}
+function show(v){$$('.view').forEach(x=>x.classList.toggle('on',x.id===v));$$('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));scrollTo({top:0,behavior:'smooth'});if(v==='sign')fillPick();history.replaceState(null,'','#'+v)}
+$$('nav button').forEach(b=>b.onclick=()=>show(b.dataset.v));
+
+/* IndexedDB */
+const open=()=>new Promise((r,j)=>{const q=indexedDB.open('pulseipa',1);q.onupgradeneeded=()=>q.result.createObjectStore('f',{keyPath:'id'});q.onsuccess=()=>{db=q.result;r()};q.onerror=j});
+const tx=(m)=>db.transaction('f',m).objectStore('f');
+const all=()=>new Promise(r=>{const q=tx('readonly').getAll();q.onsuccess=()=>r(q.result.sort((a,b)=>b.added-a.added))});
+const put=o=>new Promise(r=>{const q=tx('readwrite').put(o);q.onsuccess=r});
+const del=id=>new Promise(r=>{const q=tx('readwrite').delete(id);q.onsuccess=r});
+async function refresh(){items=await all();render()}
+
+/* IPA parsing: zip + plist */
+async function readEntry(file,pred){
+  const tail=new DataView(await file.slice(Math.max(0,file.size-70000)).arrayBuffer());
+  let e=-1;for(let i=tail.byteLength-22;i>=0;i--)if(tail.getUint32(i,true)===0x06054b50){e=i;break}
+  if(e<0)throw 0;
+  const n=tail.getUint16(e+10,true),cdSize=tail.getUint32(e+12,true),cdOff=tail.getUint32(e+16,true);
+  const cd=new DataView(await file.slice(cdOff,cdOff+cdSize).arrayBuffer());
+  let p=0;
+  for(let i=0;i<n;i++){
+    const m=cd.getUint16(p+10,true),cs=cd.getUint32(p+20,true),nl=cd.getUint16(p+28,true),el=cd.getUint16(p+30,true),cl=cd.getUint16(p+32,true),lo=cd.getUint32(p+42,true);
+    const name=new TextDecoder().decode(new Uint8Array(cd.buffer,p+46,nl));
+    if(pred(name)){
+      const lh=new DataView(await file.slice(lo,lo+30).arrayBuffer());
+      const st=lo+30+lh.getUint16(26,true)+lh.getUint16(28,true);
+      const raw=file.slice(st,st+cs);
+      if(m===0)return new Uint8Array(await raw.arrayBuffer());
+      const s=raw.stream().pipeThrough(new DecompressionStream('deflate-raw'));
+      return new Uint8Array(await new Response(s).arrayBuffer());
+    }
+    p+=46+nl+el+cl;
+  }
+  return null;
+}
+function bplist(u){
+  const dv=new DataView(u.buffer,u.byteOffset,u.byteLength),t=u.length-32;
+  const os=u[t+6],rs=u[t+7],top=Number(dv.getBigUint64(t+16)),ot=Number(dv.getBigUint64(t+24));
+  const rd=(o,n)=>{let v=0;for(let i=0;i<n;i++)v=v*256+u[o+i];return v};
+  const obj=i=>{
+    const o=rd(ot+i*os,os),b=u[o],k=b>>4;let l=b&15,s=o+1;
+    if(k!==0&&k!==1&&k!==2&&l===15){const c=1<<(u[s]&15);l=rd(s+1,c);s+=1+c}
+    if(k===0)return b===9?true:b===8?false:null;
+    if(k===1)return rd(s,1<<l);
+    if(k===2)return l===3?dv.getFloat64(s):dv.getFloat32(s);
+    if(k===5)return new TextDecoder('ascii').decode(u.subarray(s,s+l));
+    if(k===6)return new TextDecoder('utf-16be').decode(u.subarray(s,s+l*2));
+    if(k===10)return Array.from({length:l},(_,j)=>obj(rd(s+j*rs,rs)));
+    if(k===13){const d={};for(let j=0;j<l;j++)d[obj(rd(s+j*rs,rs))]=obj(rd(s+(l+j)*rs,rs));return d}
+    return null};
+  return obj(top);
+}
+function xplist(u){
+  const d=new DOMParser().parseFromString(new TextDecoder().decode(u),'text/xml');
+  const val=n=>{switch(n.tagName){case'dict':{const o={};const c=[...n.children];for(let i=0;i<c.length;i+=2)o[c[i].textContent]=val(c[i+1]);return o}case'array':return[...n.children].map(val);case'true':return true;case'false':return false;case'integer':return+n.textContent;default:return n.textContent}};
+  return val(d.querySelector('plist > *'));
+}
+async function inspect(file){
+  try{
+    const u=await readEntry(file,n=>/^Payload\/[^/]+\.app\/Info\.plist$/.test(n));
+    const pl=String.fromCharCode(...u.subarray(0,6))==='bplist'?bplist(u):xplist(u);
+    return{name:pl.CFBundleDisplayName||pl.CFBundleName||file.name.replace(/\.ipa$/i,''),bid:pl.CFBundleIdentifier||'—',ver:pl.CFBundleShortVersionString||'—',min:pl.MinimumOSVersion||''};
+  }catch(e){return{name:file.name.replace(/\.ipa$/i,''),bid:'—',ver:'—',min:''}}
+}
+async function addFile(blob,fname,src){
+  if(!/\.ipa$/i.test(fname)){toast('Нужен файл .ipa',false);return}
+  const f=new File([blob],fname,{type:'application/octet-stream'});
+  const m=await inspect(f);
+  await put({id:crypto.randomUUID(),file:f,fname,size:f.size,added:Date.now(),src,...m});
+  await refresh();toast('Добавлено: '+m.name)
+}
+
+/* Render */
+function row(it){
+  const d=document.createElement('div');d.className='glass item';
+  d.innerHTML=`<div class="ico">▱</div><div class="meta"><b></b><small></small></div><button class="more" aria-label="Действия">⋯</button>`;
+  d.querySelector('b').textContent=it.name;
+  d.querySelector('small').textContent=`${it.ver} · ${fmt(it.size)} · ${it.bid}`;
+  d.querySelector('.more').onclick=()=>menu(it);d.onclick=e=>{if(e.target.tagName!=='BUTTON')menu(it)};
+  return d;
+}
+function render(){
+  const q=$('#q').value.toLowerCase();
+  $('#sCount').textContent=items.length;$('#sSize').textContent=fmt(items.reduce((a,b)=>a+b.size,0));
+  const L=$('#list');L.innerHTML='';
+  const f=items.filter(i=>(i.name+i.bid+i.fname).toLowerCase().includes(q));
+  if(!f.length)L.innerHTML=`<div class="glass empty"><i>▱</i><b>${items.length?'Ничего не найдено':'Пока пусто'}</b><br>${items.length?'Измени запрос':'Импортируй IPA или скачай по ссылке'}<br><br><button class="btn" id="eImp">Импортировать</button></div>`;
+  f.forEach(i=>L.append(row(i)));
+  const e=$('#eImp');if(e)e.onclick=()=>$('#fImp').click();
+  const R=$('#recent');R.innerHTML='';
+  items.slice(0,3).forEach(i=>R.append(row(i)));
+  if(!items.length)R.innerHTML='<div class="glass empty">Здесь появятся добавленные файлы</div>';
+}
+$('#q').oninput=render;
+
+/* Sheet */
+function sheet(t,s,btns){$('#shT').textContent=t;$('#shS').textContent=s;const r=$('#shR');r.innerHTML='';
+  btns.forEach(([l,cls,fn])=>{const b=document.createElement('button');b.className='btn '+cls;b.textContent=l;b.onclick=()=>{$('#sheet').classList.remove('on');fn&&fn()};r.append(b)});
+  $('#sheet').classList.add('on')}
+$('#sheet').onclick=e=>{if(e.target.id==='sheet')e.target.classList.remove('on')};
+function saveAs(it){const a=document.createElement('a');a.href=URL.createObjectURL(it.file);a.download=it.fname;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),9e3)}
+function menu(it){
+  sheet(it.name,`${it.bid} · ${it.ver}${it.min?' · iOS '+it.min+'+':''}`,[
+   ['Установить (открыть в…)','',async()=>{
+     if(navigator.canShare&&navigator.canShare({files:[it.file]})){try{await navigator.share({files:[it.file],title:it.name});}catch(e){}}
+     else{saveAs(it);toast('Файл сохранён. Открой его в AltStore или TrollStore')}}],
+   ['Скачать файл','sec',()=>saveAs(it)],
+   ['Подписать','sec',()=>{show('sign');$('#pick').value=it.id}],
+   ['Переименовать','sec',async()=>{const n=prompt('Название',it.name);if(n){it.name=n.trim()||it.name;await put(it);refresh()}}],
+   ['Удалить','red',async()=>{if(confirm('Удалить «'+it.name+'»?')){await del(it.id);refresh();toast('Удалено')}}],
+   ['Закрыть','sec']]);
+}
+
+/* Import */
+$('#aImport').onclick=()=>$('#fImp').click();
+$('#fImp').onchange=async e=>{for(const f of e.target.files)await addFile(f,f.name,'file');e.target.value='';show('library')};
+addEventListener('dragover',e=>{e.preventDefault();document.body.classList.add('drop')});
+addEventListener('dragleave',()=>document.body.classList.remove('drop'));
+addEventListener('drop',async e=>{e.preventDefault();document.body.classList.remove('drop');for(const f of e.dataTransfer.files)await addFile(f,f.name,'file')});
+
+/* Download */
+$('#aDl').onclick=()=>{show('download');$('#url').focus()};
+$('#aSign').onclick=()=>show('sign');
+$('#aExport').onclick=()=>{
+  const j=JSON.stringify(items.map(({file,...r})=>r),null,2);
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([j],{type:'application/json'}));a.download='pulseipa-library.json';a.click();toast('Список сохранён')};
+$('#dlGo').onclick=async()=>{
+  const u=$('#url').value.trim();
+  if(!/^https:\/\/.+/i.test(u)){toast('Нужна HTTPS-ссылка',false);return}
+  const b=$('#dlGo');b.disabled=true;$('#state').textContent='Загрузка';
+  try{
+    const r=await fetch(u);if(!r.ok)throw new Error('HTTP '+r.status);
+    const total=+r.headers.get('content-length')||0,rd=r.body.getReader(),ch=[];let got=0;
+    for(;;){const{done,value}=await rd.read();if(done)break;ch.push(value);got+=value.length;
+      $('#prog').style.width=total?got/total*100+'%':'50%';$('#dlNote').textContent=fmt(got)+(total?' из '+fmt(total):'')}
+    let name=decodeURIComponent(u.split('?')[0].split('/').pop()||'app.ipa');if(!/\.ipa$/i.test(name))name+='.ipa';
+    await addFile(new Blob(ch),name,u);$('#prog').style.width='100%';$('#dlNote').textContent='Готово';$('#url').value='';show('library')
+  }catch(e){toast('Не удалось скачать: возможно, сервер не разрешает CORS',false);$('#dlNote').textContent='Ошибка загрузки'}
+  b.disabled=false;$('#state').textContent='Готов';setTimeout(()=>$('#prog').style.width=0,800)
+};
+
+/* Sign */
+function fillPick(){const s=$('#pick'),v=s.value;s.innerHTML='<option value="">Или выбрать из библиотеки</option>'+items.map(i=>`<option value="${i.id}">${i.name.replace(/</g,'')}</option>`).join('');s.value=v}
+[['fIpa','lIpa'],['fP12','lP12'],['fMp','lMp']].forEach(([i,l])=>$('#'+i).onchange=e=>{const f=e.target.files[0];$('#'+l).classList.toggle('has',!!f);if(f)$('#'+l).firstChild.textContent='✓ '+f.name});
+$('#ep').value=localStorage.getItem('ep')||'';
+$('#signGo').onclick=async()=>{
+  const ep=$('#ep').value.trim();
+  if(!/^https:\/\//i.test(ep))return toast('Укажи HTTPS-адрес сервиса подписи',false);
+  const pick=items.find(i=>i.id===$('#pick').value),ipa=$('#fIpa').files[0]||pick&&pick.file,p12=$('#fP12').files[0],mp=$('#fMp').files[0];
+  if(!ipa)return toast('Выбери IPA',false);
+  if(!p12||!mp)return toast('Нужны .p12 и .mobileprovision',false);
+  if(!$('#pw').value)return toast('Введи пароль сертификата',false);
+  localStorage.setItem('ep',ep);
+  const fd=new FormData();fd.append('ipa',ipa,ipa.name||'app.ipa');fd.append('p12',p12);fd.append('mobileprovision',mp);fd.append('password',$('#pw').value);if($('#bid').value.trim())fd.append('bundle_id',$('#bid').value.trim());
+  const b=$('#signGo');b.disabled=true;$('#state').textContent='Подпись';$('#sprog').style.width='40%';
+  try{
+    const r=await fetch(ep,{method:'POST',body:fd});if(!r.ok)throw new Error(r.status);
+    const bl=await r.blob();$('#sprog').style.width='100%';
+    const nm=(pick?pick.name:ipa.name.replace(/\.ipa$/i,''))+'-signed.ipa';
+    await addFile(bl,nm,'signed');$('#pw').value='';show('library');toast('Подписанный IPA добавлен')
+  }catch(e){toast('Сервис подписи не ответил или отклонил файлы',false)}
+  b.disabled=false;$('#state').textContent='Готов';setTimeout(()=>$('#sprog').style.width=0,800)
+};
+
+open().then(refresh).then(()=>{const h=location.hash.slice(1);if(['home','library','download','sign'].includes(h))show(h)});
+if('serviceWorker' in navigator&&0)navigator.serviceWorker.register('sw.js');
+</script>
 </body>
 </html>
