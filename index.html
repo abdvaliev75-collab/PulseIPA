@@ -293,7 +293,6 @@ $('#signGo').onclick=async()=>{
 };
 
 open().then(refresh).then(()=>{const h=location.hash.slice(1);if(['home','library','download','sign'].includes(h))show(h)});
-if('serviceWorker' in navigator&&0)navigator.serviceWorker.register('sw.js');
 </script>
 </body>
 </html>
